@@ -18,3 +18,7 @@ export const comparePassword = async (password, hashedPassword) => {
 // service- axios : post,get opertaions , .env: URL loading
 // useState : single use state
 // products models : mongoose validation
+
+
+
+//category -> api call db -> subcategory -> frontend
