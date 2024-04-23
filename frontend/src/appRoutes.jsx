@@ -1,24 +1,29 @@
 import { Routes, Route } from "react-router-dom";
-import HomePage from "./Pages/homePage.jsx";
-import About from "./Pages/about.jsx";
-import Contact from "./Pages/contact.jsx";
-import Policy from "./Pages/policy.jsx";
-import PageNotFound from "./Pages/pageNotFound.jsx";
-import Register from "./Pages/Auth/Register.jsx";
-import Login from "./Pages/login.jsx";
-import Cart from "./Pages/cart.jsx";
+import HomePage from "./pages/homePage.jsx";
+import About from "./pages/about.jsx";
+import Contact from "./pages/contact.jsx";
+import Policy from "./pages/policy.jsx";
+import PageNotFound from "./pages/pageNotFound.jsx";
+import Register from "./pages/auth/register.jsx";
+import Login from "./pages/login.jsx";
+import CartPage from "./pages/cart.jsx";
+import DashBoard from "./pages/user/dashBoard.jsx";
+import PrivateRoute from "./components/routes/private.jsx";
 
 function App() {
   return (
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<PrivateRoute/>}>
+          <Route path="" element={<DashBoard />} />
+        </Route>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/policy" element={<Policy />} />
-        <Route path="/cart" element={<Cart />} />
+        <Route path="/cart" element={<CartPage />} />
         <Route path="/*" element={<PageNotFound />} />
       </Routes>
     </>

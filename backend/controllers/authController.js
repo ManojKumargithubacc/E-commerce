@@ -1,34 +1,24 @@
 import { comparePassword, hashPassword } from "../helpers/authHelper.js";
 import userModel from "../models/userModel.js";
+import { STATUS_CODES,MESSAGES } from "../constants/constants.js"; 
 import JWT from "jsonwebtoken";
-// import { exsistingUser, user} from "../service/userService.js";
 
 export const registerController = async (req, res) => {
   try {
     const { name, email, mobileNumber, password } = req.body;
     //Validation
-    if (!name) {
-      return res.send({ message: "Name is required" });
-    }
-    if (!email) {
-      return res.send({ message: "E-mail is required" });
-    }
-    if (!mobileNumber) {
-      return res.send({ message: "Mobile number is required" });
-    }
-    if (!password) {
-      return res.send({ message: "Password is required" });
+    if (!name || !email || !mobileNumber || !password) {
+      return res.status(STATUS_CODES.BAD_REQUEST).send({ message: MESSAGES.INVALID_DATA });
     }
     // Check for exsisting user
-    const exsistingUser = await userModel.findOne({ email });
-    if (exsistingUser) {
-      return res.status(200).send({
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.status(STATUS_CODES.SUCCESS).send({
         success: false,
-        message: "Account already exsists please login",
+        message: MESSAGES.ACCOUNT_EXISTS,
       });
     }
     // register user
-    // exsistingUser()
     const hashedPassword = await hashPassword(password);
     //Saving user
     const user = await new userModel({
@@ -37,16 +27,16 @@ export const registerController = async (req, res) => {
       mobileNumber,
       password: hashedPassword,
     }).save();
-    res.status(200).send({
+    res.status(STATUS_CODES.SUCCESS).send({
       success: true,
-      message: "Account created successfully",
+      message: MESSAGES.ACCOUNT_CREATED,
       user,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    res.status(STATUS_CODES.SERVER_ERROR).send({
       success: false,
-      message: "Error in creating account ",
+      message: MESSAGES.SERVER_ERROR,
       error,
     });
   }
@@ -56,32 +46,33 @@ export const loginController = async (req, res) => {
     const { email, password } = req.body;
     //validation
     if (!email || !password) {
-      return res.status(404).send({
+      return res.status(STATUS_CODES.BAD_REQUEST).send({
         success: false,
-        message: "Invalid email or password",
+        message: MESSAGES.INVALID_DATA,
       });
     }
     //Check user
+    
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(200).send({
+      return res.status(STATUS_CODES.SUCCESS).send({
         success: false,
-        message: "Email is not registered",
+        message: MESSAGES.EMAIL_NOT_REGISTERED,
       });
     }
     //Decrypting the passord and comparing it
     // user()
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.status(200).send({
-        success: true,
-        message: "Invalid password",
+      return res.status(STATUS_CODES.SUCCESS).send({
+        success: false,
+        message: MESSAGES.INVALID_PASSWORD,
       });
     }
     const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET);
-    res.status(200).send({
+    res.status(STATUS_CODES.SUCCESS).send({
       success: true,
-      message: "Logged in successfully",
+      message: MESSAGES.LOGIN_SUCCESSFUL,
       user: {
         name: user.name,
         email: user.email,
@@ -91,9 +82,9 @@ export const loginController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    res.status(STATUS_CODES.SERVER_ERROR).send({
       success: false,
-      message: "Error in login please enter valid credentials",
+      message: MESSAGES.SERVER_ERROR,
     });
   }
 };
